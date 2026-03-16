@@ -1,0 +1,11 @@
+dist/
+node_modules/
+data/
+.DS_Store
+coverage/
+.venv/
+config.json
+downloads/
+MoodleDL.log
+responses.log
+cookie.txt

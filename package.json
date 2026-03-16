@@ -1,0 +1,31 @@
+{
+  "name": "fernfh-s2",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server for chatting with FernFH study materials",
+  "bin": {
+    "fernfh-s2-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "chokidar": "^5.0.0",
+    "html-to-text": "^9.0.5",
+    "minisearch": "^7.2.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.5",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
