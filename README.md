@@ -18,7 +18,13 @@ npm run build
 
 ## FernFH Moodle-DL Notes
 
-Die FernFH-spezifische Vorgehensweise fuer `moodle-dl`, inklusive SSO-Token-Flow, API-Test, Grenzen und Sicherheits-Hinweisen, steht in [docs/fernfh-moodle-dl.md](/home/lukaszangerl/Dokumente/01%20Projects/fernfh-s2/docs/fernfh-moodle-dl.md).
+Die FernFH-spezifische Vorgehensweise fuer `moodle-dl`, inklusive SSO-Token-Flow, API-Test, Vollkurs-Download, Grenzen und Sicherheits-Hinweisen, steht in [docs/fernfh-moodle-dl.md](docs/fernfh-moodle-dl.md).
+
+Wichtig:
+
+- Dieses Repo ist der lokale MCP-/Import-/Index-Server.
+- `moodle-dl` ist ein getrennter Downloader, der fuer FernFH-Login und Materialabruf genutzt wird.
+- `downloads/` ist eine lokale Materialablage, waehrend `data/` der eigentliche MCP-/Index-Datenbestand ist.
 
 ## Server starten
 

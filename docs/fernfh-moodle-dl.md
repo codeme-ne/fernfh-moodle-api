@@ -158,7 +158,7 @@ Ueber die API sichtbar:
 
 Erfolgreich direkt ueber API-Dateilink heruntergeladen:
 
-- [downloads/CIS604 - Datenvisualisierungs-Labor/LV-Konzept_ITMA_CIS604_SoSe2026_Jungbauer.pdf](/home/lukaszangerl/Dokumente/01%20Projects/fernfh-s2/downloads/CIS604%20-%20Datenvisualisierungs-Labor/LV-Konzept_ITMA_CIS604_SoSe2026_Jungbauer.pdf)
+- `downloads/CIS604 - Datenvisualisierungs-Labor/LV-Konzept_ITMA_CIS604_SoSe2026_Jungbauer.pdf`
 
 Verifikation:
 
@@ -166,6 +166,182 @@ Verifikation:
 PDF
 6 Seiten
 Titel: ITMA LV-Konzept CIS604
+```
+
+## Vollkurs-Download Mit moodle-dl
+
+Erfolgreich getestet wurde auch ein kompletter `moodle-dl`-Lauf fuer:
+
+- `5517`
+- `CIS604 - Datenvisualisierungs-Labor`
+
+Vorgehen:
+
+1. Die echte `config.json` nicht direkt fuer Kursfilter aendern.
+2. Stattdessen einen Temp-Ordner erzeugen und die echte `config.json` dorthin kopieren.
+3. Wichtig: `moodle-dl -p <ordner>` liest **nur** `<ordner>/config.json`.
+   Der Temp-Ordner wird **nicht** mit der echten Konfiguration gemerged.
+4. Deshalb muss die temporaere `config.json` die vorhandenen Pflichtfelder behalten,
+   mindestens:
+
+```json
+{
+  "moodle_domain": "onlinecampus.fernfh.ac.at",
+  "moodle_path": "/",
+  "token": "...",
+  "privatetoken": "..."
+}
+```
+
+5. In dieser kopierten JSON-Datei nur die Download-Optionen zusaetzlich setzen oder ueberschreiben, z. B.:
+
+```json
+{
+  "download_course_ids": [5517],
+  "download_descriptions": true,
+  "download_forums": true,
+  "download_books": true,
+  "download_lessons": true,
+  "download_workshops": true,
+  "download_quizzes": true,
+  "download_also_with_cookie": true,
+  "download_path": "/absoluter/lokaler/zielordner"
+}
+```
+
+6. Beispielablauf:
+
+```bash
+tmpdir="$(mktemp -d)"
+cp config.json "$tmpdir/config.json"
+# Danach in $tmpdir/config.json die zusaetzlichen JSON-Felder setzen.
+.venv/bin/moodle-dl -p "$tmpdir"
+```
+
+7. Danach den Lauf mit dem temporaeren Profil starten:
+
+```bash
+.venv/bin/moodle-dl -p /tmp/<temp-config-dir>
+```
+
+Ergebnis in dieser Session:
+
+- `35` Dateien/Markdown-Dateien
+- ca. `41 MiB`
+- Zielordner:
+  `downloads/moodle-dl/CIS604 - Datenvisualisierungs-Labor`
+
+Mitgenommen wurden u. a.:
+
+- `ESA1.pdf`
+- `ESA2.pdf`
+- `ESA3.pdf`
+- `ESA4.pdf`
+- `LV-Konzept_ITMA_CIS604_SoSe2026_Jungbauer.pdf`
+- `tableau-for-dummies-2nd-edition.pdf`
+- `ScientificPosters.pdf`
+- Foren und Beschreibungen als `.md`
+
+Bekannter Schoenheitsfehler:
+
+- Der `LV-Konzept`-Unterordner bekam einen HTML-artigen Namen.
+- Der Inhalt wurde trotzdem korrekt heruntergeladen.
+
+## Warum Nach downloads/?
+
+`moodle-dl` wurde in dieser Session absichtlich nach `downloads/` umgeleitet, weil:
+
+- der Zielordner lokal bleiben sollte
+- die eigentliche `config.json` unveraendert bleiben sollte
+- der Vollkurs-Download sauber von Repo-Code und MCP-Daten getrennt sein sollte
+- `downloads/` bereits in `.gitignore` steht
+
+Wichtig:
+
+- Das ist **kein fest verdrahteter Pflichtpfad**.
+- Naechstes Mal kann genauso gut ein anderer lokaler Ordner verwendet werden, z. B.:
+
+```text
+$HOME/FernFH/moodle-dl
+```
+
+- Fuer laengerfristige Ablage ist ein externer lokaler Datenordner meist besser als `repo/downloads/`.
+- Das aktuelle MCP/RAG-Projekt importiert primaer ZIPs. Der `downloads/`-Ordner ist also Materialablage, nicht automatisch der kanonische RAG-Speicher.
+
+## Session-Handoff 2026-03-16
+
+Ziel dieser Session:
+
+- FernFH-SSO fuer `moodle-dl` sauber und ohne weiteres Lockout zum Laufen bringen
+- pruefen, was ueber die Moodle-API wirklich sichtbar ist
+- einen kompletten Kurs testweise herunterladen
+- das Repo fuer kuenftige Arbeit dokumentieren und absichern
+
+Wichtige Entscheidungen:
+
+- Dieses Repo ist **nicht** das Upstream-`moodle-dl`-Projekt.
+- Dieses Repo ist ein eigener lokaler MCP-Server fuer Import, Extraktion, Index und Suche.
+- `moodle-dl` ist hier nur der Downloader und Token-Client.
+- `sesskey` wird fuer diesen Workflow nicht mehr verwendet.
+- Fuer FernFH wird kuenftig immer zuerst `--init --sso` angenommen.
+
+Was heute im Repo relevant gemacht oder geaendert wurde:
+
+- [README.md](../README.md)
+  enthaelt den Verweis auf diese FernFH-Doku.
+- [.gitignore](../.gitignore)
+  schliesst lokale Secrets und Laufzeitdateien aus, u. a. `config.json`, `.venv/`, `downloads/`.
+- [AGENTS.md](../AGENTS.md)
+  enthaelt Repo-Konventionen fuer kuenftige Mitarbeit.
+
+Relevante Code-Dateien fuer den naechsten Einstieg:
+
+- [src/server.ts](../src/server.ts)
+  MCP-Tool-Registrierung
+- [src/import-service.ts](../src/import-service.ts)
+  Import von ZIPs in den lokalen Datenbestand
+- [src/extractors.ts](../src/extractors.ts)
+  Textextraktion aus PDF/HTML/Bildern
+- [src/index-store.ts](../src/index-store.ts)
+  Chunking und Suchindex
+- [src/watcher-service.ts](../src/watcher-service.ts)
+  Beobachtung eines Download-Ordners fuer neue ZIP-Dateien
+
+Was lokal vorhanden sein sollte, bevor es weitergeht:
+
+- `.venv` mit funktionierendem `moodle-dl`
+- lokale `config.json` mit `token` und `privatetoken`
+- ein bewusst gewaehlter lokaler Zielordner fuer Downloads
+- optional ein externer Datenordner fuer spaeteren RAG-Bestand
+
+Was beim naechsten Mal zuerst gelesen werden soll:
+
+1. [README.md](../README.md)
+2. diese Datei
+3. die vier Kernstellen in `src/`
+
+Was beim naechsten Mal zuerst getan werden soll:
+
+1. Nicht neu einloggen, solange der vorhandene Token noch funktioniert.
+2. Erst `config.json` lokal pruefen.
+3. Danach nur einen read-only API-Test ausfuehren.
+4. Erst dann Kurse listen.
+5. Danach entweder einen kleinen Dateitest oder einen Vollkurs-Download mit temporaerer Konfiguration starten.
+
+Offene Entscheidungen fuer die naechste Session:
+
+- finalen lokalen Zielordner fuer laengerfristige Downloads festlegen
+- entscheiden, ob `downloads/` nur Testablage bleibt oder durch einen externen lokalen Pfad ersetzt wird
+- entscheiden, ob der Importpfad spaeter direkt aus `moodle-dl`-Downloads statt nur aus ZIPs unterstuetzt werden soll
+- entscheiden, ob zusaetzlich zu `.txt` auch `.md` als kanonisches Zwischenformat gespeichert werden soll
+
+Merksatz:
+
+```text
+moodle-dl  = Download + Moodle-API
+fernfh-s2  = lokaler MCP + Extraktion + Suche
+downloads/ = lokale Materialablage, nicht automatisch der RAG-Hauptspeicher
+data/      = eigentlicher MCP-/Index-Datenbestand
 ```
 
 ## Nächstes Mal Zuerst Lesen
